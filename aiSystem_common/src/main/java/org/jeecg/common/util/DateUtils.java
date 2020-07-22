@@ -616,6 +616,18 @@ public class DateUtils extends PropertyEditorSupport {
         return 0;
     }
 
+    // 获取两个时间相差分钟数
+    public static long get2Time(String oldTime,String newTime) throws ParseException {
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long NTime =df.parse(newTime).getTime();
+        //从对象中拿到时间
+        long OTime = df.parse(oldTime).getTime();
+        long diff=(NTime-OTime)/1000/60;
+        return diff;
+
+    }
+
     /**
      * String类型 转换为Date, 如果参数长度为10 转换格式”yyyy-MM-dd“ 如果参数长度为19 转换格式”yyyy-MM-dd
      * HH:mm:ss“ * @param text String类型的时间值

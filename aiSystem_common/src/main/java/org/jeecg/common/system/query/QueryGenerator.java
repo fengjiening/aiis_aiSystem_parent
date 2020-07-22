@@ -436,7 +436,7 @@ public class QueryGenerator {
 			queryWrapper.le(name, value);
 			break;
 		case EQ:
-			queryWrapper.eq(name, value);
+			queryWrapper.like(name, value);
 			break;
 		case NE:
 			queryWrapper.ne(name, value);

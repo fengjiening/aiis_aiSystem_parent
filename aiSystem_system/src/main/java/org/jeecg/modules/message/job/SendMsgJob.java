@@ -8,9 +8,7 @@ import org.jeecg.modules.message.handle.ISendMsgHandle;
 import org.jeecg.modules.message.handle.enums.SendMsgStatusEnum;
 import org.jeecg.modules.message.handle.enums.SendMsgTypeEnum;
 import org.jeecg.modules.message.service.ISysMessageService;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -22,13 +20,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 
 @Slf4j
-public class SendMsgJob implements Job {
+public class SendMsgJob {
 
 	@Autowired
 	private ISysMessageService sysMessageService;
 
-	@Override
-	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+
+	public void execute() {
 
 		log.info(String.format(" Jeecg-Boot 发送消息任务 SendMsgJob !  时间:" + DateUtils.getTimestamp()));
 

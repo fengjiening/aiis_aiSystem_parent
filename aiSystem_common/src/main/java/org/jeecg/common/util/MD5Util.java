@@ -3,6 +3,7 @@ package org.jeecg.common.util;
 import java.security.MessageDigest;
 
 public class MD5Util {
+	public final static String SECRET="sinovoice";
 
 	public static String byteArrayToHexString(byte b[]) {
 		StringBuffer resultSb = new StringBuffer();
@@ -39,5 +40,7 @@ public class MD5Util {
 
 	private static final String hexDigits[] = { "0", "1", "2", "3", "4", "5",
 			"6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
+
+
 
 }

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.util.WebAppRootListener;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -24,6 +25,7 @@ import java.net.UnknownHostException;
 
 @Slf4j
 @EnableSwagger2
+@EnableScheduling
 @SpringBootApplication
 public class JeecgApplication {
 

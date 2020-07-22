@@ -35,6 +35,12 @@
 			<artifactId>aiSystem_common</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<!--可以引入日志 @Slf4j注解-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+
 	</dependencies>
 	
 	<build>

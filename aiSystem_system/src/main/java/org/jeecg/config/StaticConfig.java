@@ -27,5 +27,6 @@ public class StaticConfig {
         DySmsHelper.setAccessKeyId(accessKeyId);
         DySmsHelper.setAccessKeySecret(accessKeySecret);
         EmailSendMsgHandle.setEmailFrom(emailFrom);
+
     }
 }

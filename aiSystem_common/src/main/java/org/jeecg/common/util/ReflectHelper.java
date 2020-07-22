@@ -76,6 +76,8 @@ public class ReflectHelper {
      * @desc 调用set方法
      */
     public boolean setMethodValue(String property, Object object) {
+        String reoKey ="_";
+        if (property.contains(reoKey))property=property.replace(reoKey,"");
         Method m = setMethods.get(property.toLowerCase());
         if (m != null) {
             try {
