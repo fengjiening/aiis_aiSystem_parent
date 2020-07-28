@@ -73,12 +73,12 @@ public class AbilityController{
      * @return
      */
     @RequestMapping(value = "/sign/{invalidata}")
-    public Result<?> sign(@PathVariable("invalidata") String invalidata,String path,String type,String message,String id ,String sysTime,String temperature ) {
+    public Result<?> sign(@PathVariable("invalidata") String invalidata,String path,String type,String message,String id ,String sysTime,String temperature,String name ) {
         log.info("签到 HTTP接口进入");
         try{
              String [] inStr = invalidata.split("-");
             if (MD5Util.MD5Encode(inStr[2]+MD5Util.SECRET,null).equals(inStr[1])){
-                return abilityService.sign(inStr[0] ,path,type,message,id,sysTime,temperature);
+                return abilityService.sign(inStr[0] ,path,type,message,id,sysTime,temperature,name);
             }else  return  Result.error("非法请求！！");
 
         }catch (JeecgBootException e){

@@ -152,5 +152,35 @@ public class RegisteredInfoController extends JeecgController<RegisteredInfo, IR
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, RegisteredInfo.class);
     }
+	 /**
+	  *   通过id启用
+	  *
+	  * @param id
+	  * @return
+	  */
+	 @AutoLog(value = "考勤员工-通过id启用")
+	 @ApiOperation(value="考勤员工-通过id启用", notes="考勤员工-通过id启用")
+	 @DeleteMapping(value = "/awake")
+	 public Result<?> awake(@RequestParam(name="id",required=true) String id) {
+         RegisteredInfo registeredInfo = registeredInfoService.getById(id);
+         registeredInfo.setIsDel(0);
+         registeredInfoService.updateById(registeredInfo);
+         return Result.ok("启用成功!");
+	 }
+	 /**
+	  *   通过id停用
+	  *
+	  * @param id
+	  * @return
+	  */
+	 @AutoLog(value = "考勤员工-通过id停用")
+	 @ApiOperation(value="考勤员工-通过id停用", notes="考勤员工-通过id停用")
+	 @DeleteMapping(value = "/stop")
+	 public Result<?> stop(@RequestParam(name="id",required=true) String id) {
+         RegisteredInfo registeredInfo = registeredInfoService.getById(id);
+         registeredInfo.setIsDel(1);
+         registeredInfoService.updateById(registeredInfo);
+		 return Result.ok("停用成功!");
+	 }
 
 }

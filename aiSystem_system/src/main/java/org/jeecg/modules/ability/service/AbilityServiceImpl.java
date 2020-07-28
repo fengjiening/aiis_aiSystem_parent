@@ -27,6 +27,7 @@ import org.jeecg.modules.record.service.IAeRecordService;
 import org.jeecg.modules.staff.entity.RegisteredInfo;
 import org.jeecg.modules.staff.service.IRegisteredInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +48,8 @@ import java.util.Map;
 @Slf4j
 public class AbilityServiceImpl implements AbilityService {
     //人脸图像地址
-    private final String  BASE_PIC_URL="http://10.0.1.47:8081/";
+    @Value(value = "${hcicloud.head_url}")
+    private String  BASE_PIC_URL;
 
     @Autowired
     private IAeDailySignService aeDailySignService;
@@ -83,9 +85,15 @@ public class AbilityServiceImpl implements AbilityService {
                 SystemConstant.getAfrCapKey(), SystemConstant.getAfrSdkVersion(), SystemConstant.getAfrDeveloperKey(), faceResult, Integer.parseInt(SystemConstant.getAfrThreshold()));
 
         if (a.getErrorCode()==0&&a.getResult().size()>0){
-            String userID=a.getResult().get(0).getUserId();
+
             //todo  数据查询用户信息
-            RegisteredInfo user = getUserInfo("afr",userID);
+            RegisteredInfo user=null;
+            String userID=null;
+            for(Recognise_Result result: a.getResult()){
+                userID=a.getResult().get(0).getUserId();
+                user = getUserInfo("afr",userID);
+                if(user!=null) break;
+            }
             //match 3 平台识别到 ，但是考勤没有这个人
             //match 2  识别到了这个人
             //match 1   平台未找到这个人
@@ -156,8 +164,13 @@ public class AbilityServiceImpl implements AbilityService {
 
 
             //todo  数据查询用户信息
-            RegisteredInfo user = getUserInfo("vpr",listCommonReturnMethod.getResult().get(0).getUserId());
-
+            RegisteredInfo user=null;
+            String userID=null;
+            for(Recognise_Result result: listCommonReturnMethod.getResult()){
+                userID=result.getUserId();
+                user = getUserInfo("vpr",userID);
+                if(user!=null) break;
+            }
             if(user==null){
                 return Result.error("识别失败");
             }else if(user!=null&& user.getIsDel()==1){
@@ -207,7 +220,7 @@ public class AbilityServiceImpl implements AbilityService {
      */
     @Override
     @Transactional()
-    public Result<?> sign(String token ,String path, String type, String message, String id, String sysTime, String temperature) {
+    public Result<?> sign(String token ,String path, String type, String message, String id, String sysTime, String temperature,String name) {
         HashMap map=new HashMap(1);
         boolean signType=true;
         //获取考勤记录
@@ -278,7 +291,15 @@ public class AbilityServiceImpl implements AbilityService {
 
                 one.setEndTime(signTime);
                 String perMess=one.getRemark();
-                one.setRemark(perMess==null?"签退备注："+message:perMess+"\n签退备注："+message);
+                if(perMess==null){
+                    perMess = "签退备注："+message;
+                }else{
+                    if(perMess.indexOf("\n")>0){
+                        perMess=perMess.substring(0,perMess.indexOf("\n"))+"\n签退备注："+message;
+                    }
+                }
+                //perMess = perMess==null?"签退备注："+message:perMess+"\n签退备注："+message;
+                one.setRemark(perMess);
                 one.setIsOvertime(signStatu);
 
             } catch (ParseException e) {
@@ -294,7 +315,7 @@ public class AbilityServiceImpl implements AbilityService {
         }
         one.setUpdateTime(signTime);
         one.setTemperature(temperature);
-
+        one.setName(name);
 
         aeRecord.setState(1);
         aeRecordService.updateById(aeRecord);
@@ -358,16 +379,19 @@ public class AbilityServiceImpl implements AbilityService {
 
     private RegisteredInfo getUserInfo(String type,String id){
         RegisteredInfo RegisteredInfo=null;
-        if("afr".equals(type)){
-            QueryWrapper<RegisteredInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("AFR_INFO",id);
-            return registeredInfoService.getOne(queryWrapper);
-        }else if("vpr".equals(type)){
-            QueryWrapper<RegisteredInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("VPR_INFO",id);
-            return registeredInfoService.getOne(queryWrapper);
-        }
-        return null;
+        QueryWrapper<RegisteredInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("loginid",id);
+        return registeredInfoService.getOne(queryWrapper);
+//        if("afr".equals(type)){
+//            QueryWrapper<RegisteredInfo> queryWrapper = new QueryWrapper<>();
+//            queryWrapper.eq("loginid",id);
+//            return registeredInfoService.getOne(queryWrapper);
+//        }else if("vpr".equals(type)){
+//            QueryWrapper<RegisteredInfo> queryWrapper = new QueryWrapper<>();
+//            queryWrapper.eq("loginid",id);
+//            return registeredInfoService.getOne(queryWrapper);
+//        }
+//        return null;
     }
 
     /**

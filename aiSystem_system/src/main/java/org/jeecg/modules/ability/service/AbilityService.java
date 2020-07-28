@@ -18,7 +18,7 @@ public interface AbilityService {
     public UserFaceInfo afrRecg (FaceResult faceResult,String faceData);
     public Result<?> callVprRecognizeAbility( String  vStreamStr) throws Exception;
 
-    Result<?> sign(String token ,String path, String type, String message, String id, String sysTime, String temperature);
+    Result<?> sign(String token ,String path, String type, String message, String id, String sysTime, String temperature,String name);
 
     Result<?> check(String id,String sysTime, String temperature);
 }

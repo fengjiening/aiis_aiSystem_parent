@@ -216,6 +216,7 @@ cas:
 swagger:
   enable: true
 hcicloud:
+  head_url: http://10.0.1.47:8081/
   data:
     path: /home/jietong/kaoqi/data
     #path: c:/home/jietong/kaoqi/data

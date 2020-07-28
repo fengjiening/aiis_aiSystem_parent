@@ -50,7 +50,7 @@ public class  FaceTask {
         log.info(Thread.currentThread().getName()+"delFace 线程开始启动");
         while (session.isOpen()){
             try {
-                log.info(Thread.currentThread().getName()+" 开始获取图片数据总数【{}】",queue.size());
+                log.debug(Thread.currentThread().getName()+" 开始获取图片数据总数【{}】",queue.size());
 
                 if (queue.size()==0){
                     Thread.sleep(1000);
@@ -74,6 +74,7 @@ public class  FaceTask {
                 //实时返回人脸坐标
                 sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
 
+                log.debug(Thread.currentThread().getName()+" 返回结果【{}】", JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
                 //参数校验
                 //未获取坐标数据 不去计算
                 if (faceResult.getFaceBox()==null) continue;
@@ -103,18 +104,19 @@ public class  FaceTask {
                             xChangeArr[frameYList.size()-i] =Math.abs(frameXList.get(i-1)-frameXList.get(i-2));
                             yChangeArr[frameYList.size()-i] =Math.abs(frameYList.get(i-1)-frameYList.get(i-2));
                         }
-                        log.info(Thread.currentThread().getName()+" 人脸 X坐标 集合【{}】【{}】", ArrayUtils.toString(frameXList),input.getXRange());
-                        log.info(Thread.currentThread().getName()+" 人脸 Y坐标 集合【{}】【{}】",ArrayUtils.toString(frameYList),input.getYRange());
+                        log.debug(Thread.currentThread().getName()+" 人脸 X坐标 集合【{}】【{}】", ArrayUtils.toString(frameXList),input.getXRange());
+                        log.debug(Thread.currentThread().getName()+" 人脸 Y坐标 集合【{}】【{}】",ArrayUtils.toString(frameYList),input.getYRange());
                         //判断条件
-                        log.info(Thread.currentThread().getName()+" 人脸判断条件X方向变化率【{}】【{}】", ArrayUtils.toString(xChangeArr),input.getXRange());
-                        log.info(Thread.currentThread().getName()+" 人脸判断条件Y方向变化率【{}】【{}】",ArrayUtils.toString(xChangeArr),input.getYRange());
+                        log.debug(Thread.currentThread().getName()+" 人脸判断条件X方向变化率【{}】【{}】", ArrayUtils.toString(xChangeArr),input.getXRange());
+                        log.debug(Thread.currentThread().getName()+" 人脸判断条件Y方向变化率【{}】【{}】",ArrayUtils.toString(xChangeArr),input.getYRange());
                         if(isAt(input.getXRange(),xChangeArr)&&isAt(input.getYRange(),yChangeArr)){
                             if (faceResult.getResult()!=null){
                                 //认证
                                 abilityService.afrRecg(faceResult,input.getPicData());
-                                log.debug(Thread.currentThread().getName()+"检查成功，开始进行人脸对比..............");
+                                log.info(Thread.currentThread().getName()+"检查成功，开始进行人脸对比..............");
                                 sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
-                                clearResult(faceResult.getResult(),queue);
+                                clearResult(faceResult,queue);
+
 
                             }
                             frameXList.clear();
@@ -164,7 +166,10 @@ public class  FaceTask {
 
     }
 
-    private void clearResult(UserFaceInfo result,BlockingQueue queue) {
+    private void clearResult(FaceResult face,BlockingQueue queue) {
+        UserFaceInfo result=face.getResult();
+        face.setStable(false);
+        face.setMatch(0);
        if(result!=null){
            result.setFaceDataPath("");
            result.setScore("");

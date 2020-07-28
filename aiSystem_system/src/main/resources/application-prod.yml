@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
   tomcat:
     max-swallow-size: -1
   servlet:
@@ -127,16 +127,16 @@ spring:
         connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
       datasource:
         master:
-            url: jdbc:mysql://10.0.1.206:3306/listen100?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
-            username: root
-            password: txboss
+            url: jdbc:mysql://10.0.1.47:3306/test_attendance?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+            username: kqtest
+            password: kaoqintest
             driver-class-name: com.mysql.jdbc.Driver
         # 多数据源配置
         #multi-datasource1:
-          #url: jdbc:mysql://localhost:3306/jeecg-boot2?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true
-          #username: root
-          #password: root
-          #driver-class-name: com.mysql.jdbc.Driver
+#            url: jdbc:mysql://10.0.1.47:3306/test_attendance?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+#            username: kqtest
+#            password: kaoqintest
+#            driver-class-name: com.mysql.jdbc.Driver
   #redis 配置
   redis:
     database: 0
@@ -216,6 +216,7 @@ cas:
 swagger:
   enable: true
 hcicloud:
+  head_url: http://10.0.1.47:8081/
   data:
     path: /home/jietong/kaoqi/data
     #path: c:/home/jietong/kaoqi/data
@@ -223,12 +224,12 @@ hcicloud:
     afr_url: http://10.0.1.106:8880
     devkey: 40ff7ebfb952b623149688eac84cc68b
     appKey: 4c5d548a
-    threshold: 50
+    threshold: 70
   vpr:
     vpr_url: http://10.0.1.106:8880
     devkey: 40ff7ebfb952b623149688eac84cc68b
     appKey: 4c5d548a
-    threshold: 50
+    threshold: 60
     audioformat: pcm16k16bit
     property: 16k_digit
 
