@@ -211,3 +211,4 @@ cas:
 #enable swagger
 swagger:
   enable: true
+  test: a
