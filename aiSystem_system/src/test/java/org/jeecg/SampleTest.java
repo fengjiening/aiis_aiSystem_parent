@@ -11,12 +11,14 @@ import javax.annotation.Resource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.utils.UuidUtils;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.SystemConstant;
 import org.jeecg.common.es.JeecgElasticsearchTemplate;
 import org.jeecg.common.util.CommonMethod;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.common.util.dynamic.db.DynamicDBUtil;
 import org.jeecg.modules.ability.service.AbilityService;
+import org.jeecg.modules.ability.service.AbilityServiceImpl;
 import org.jeecg.modules.demo.mock.MockController;
 import org.jeecg.modules.demo.test.entity.JeecgDemo;
 import org.jeecg.modules.demo.test.mapper.JeecgDemoMapper;
@@ -202,4 +204,15 @@ public class SampleTest {
 		log.debug("人员同步 结束...................");
 	}
 	//author:lvdandan-----date：20190315---for:添加数据日志测试----
+
+	@Resource
+	AbilityServiceImpl abilityServiceImpl;
+	//测试打卡
+	@Test
+	//@Transactional(rollbackFor = Exception.class)
+	public synchronized void testSign() {
+
+		Result<?> sign = abilityServiceImpl.sign("", "c://afr.png", "afr", "3331我今天又迟到了下一不不是本人11", "20180917-3", 1596076500000l+ "", "39.5", "风大哥");
+		System.err.println(sign.toString());
+	}
 }

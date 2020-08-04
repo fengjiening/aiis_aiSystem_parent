@@ -26,6 +26,8 @@ import org.jeecg.modules.record.entity.AeRecord;
 import org.jeecg.modules.record.service.IAeRecordService;
 import org.jeecg.modules.staff.entity.RegisteredInfo;
 import org.jeecg.modules.staff.service.IRegisteredInfoService;
+import org.jeecg.modules.workday.entity.AeWorkDay;
+import org.jeecg.modules.workday.service.IAeWorkDayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,10 +38,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by fengjiening on 2020/6/9.
@@ -47,12 +46,37 @@ import java.util.Map;
 @Service
 @Slf4j
 public class AbilityServiceImpl implements AbilityService {
+
+    /**
+     * 昨日未打卡
+     */
+    private static final long NO_SING_KEY=-1;
+    /**
+     * 异常情况
+     */
+    private static final long ERROR_SING_KEY=-3;
+
+    /**
+     * 昨日正常签退
+     */
+    private static final long COMMON_SING_KEY=0;
+
+    /**
+     * 昨日提前签退
+     */
+    private static final long DATE_SING_KEY=-2;
+
+
     //人脸图像地址
     @Value(value = "${hcicloud.head_url}")
     private String  BASE_PIC_URL;
 
+
     @Autowired
     private IAeDailySignService aeDailySignService;
+
+    @Autowired
+    private IAeWorkDayService iAeWorkDayService;
 
     @Autowired
     private IRegisteredInfoService registeredInfoService;
@@ -101,7 +125,6 @@ public class AbilityServiceImpl implements AbilityService {
             //match 4 用户被禁用
             if(user==null){
                 faceResult.setResult(null);
-                faceResult.setStable(false);
                 faceResult.setMatch(3);
             }else if(user!=null&& user.getIsDel()==1){
                 //用户被禁用
@@ -110,7 +133,6 @@ public class AbilityServiceImpl implements AbilityService {
                 faceResult.getResult().setName(user.getName());
                 faceResult.getResult().setSysTime(String.valueOf(DateUtils.getMillis()));
                 faceResult.getResult().setId(user.getLoginid());
-                faceResult.setStable(true);
                 faceResult.getResult().setScore(String.valueOf( a.getResult().get(0).getSocre()));
                 faceResult.setMatch(4);
             }else{
@@ -125,7 +147,7 @@ public class AbilityServiceImpl implements AbilityService {
                 faceResult.getResult().setFaceDataPath(newPath);
                 faceResult.getResult().setToken(a.getResult().get(0).getToken());
                 faceResult.getResult().setHeadPic(BASE_PIC_URL+user.getUserFace());
-                faceResult.setStable(true);
+
                 faceResult.getResult().setScore(String.valueOf( a.getResult().get(0).getSocre()));
                 faceResult.setMatch(2);
                 //插入ID
@@ -142,9 +164,9 @@ public class AbilityServiceImpl implements AbilityService {
 
         }else{
             faceResult.setResult(null);
-            faceResult.setStable(false);
             faceResult.setMatch(1);
         }
+        faceResult.setStable(true);
         return null;
      }
     @Override
@@ -221,8 +243,14 @@ public class AbilityServiceImpl implements AbilityService {
     @Override
     @Transactional()
     public Result<?> sign(String token ,String path, String type, String message, String id, String sysTime, String temperature,String name) {
-        HashMap map=new HashMap(1);
+        HashMap map=new HashMap(2);
         boolean signType=true;
+        //温度 校验
+        if(temperature!=null&&!temperature.trim().equals("")){
+            double temp = Double.parseDouble(temperature);
+            if(temp>39 || temp<20) return  Result.error("人体体温异常，请检查体温数据【{"+temperature+"}】");
+        }
+
         //获取考勤记录
         Date signTime= new Date(Long.parseLong(sysTime));
         String today= DateTimeUtils.dateToStr(signTime);
@@ -242,12 +270,52 @@ public class AbilityServiceImpl implements AbilityService {
         if(aeRecord==null){
             return  Result.error("token不一致，非法请求！！");
         }
-        if(one==null) return  Result.error("数据错误，打卡失败");
+        //判断工作日
+        if(one==null) {
+            // 非工作上班
+            one =new  AeDailySign ();
+            one.setIsWorkday(2);
+            one.setIsAbsent(0);
+            one.setLoginid(id);
+            one.setHasModify(0);
+            one.setSysOrgCode("AO4");
+        }else{
+            one.setIsWorkday(1);
+        }
+
+//        QueryWrapper<AeWorkDay> aeWorkDay = new QueryWrapper<AeWorkDay>();
+//        aeWorkDay.apply("UNIX_TIMESTAMP(date) =  UNIX_TIMESTAMP('" + today+ "')");
+//        AeWorkDay day = iAeWorkDayService.getOne(aeWorkDay);
+//        if(day==null){
+//            one.setIsWorkday(1);
+//        }else{
+//            one.setIsWorkday(day.getIsWork());
+//        }
+
         //判断是否为早上
         if(one.getStartTime()==null){
+            boolean falg=false;
+            long lastTIme = signDate(signTime,id);
+            if(lastTIme==ERROR_SING_KEY){
+                falg=false;
+                map.put("perSign","ERROR_SIGN");
+            }else if(lastTIme==NO_SING_KEY){
+                map.put("perSign","NO_SIGN");
+                falg=false;
+            }else if(lastTIme==COMMON_SING_KEY){
+                map.put("perSign","NORMAL_SIGN");
+                falg=false;
+            }else{
+                map.put("perSign","OVERTIME_SIGN");
+                falg=true;
+            }
+
             int signStatu=0;
             try {
                 long time = DateUtils.get2Time(today + " 09:00:00",todayTime);
+                if(falg){
+                     time = time - lastTIme;
+                }
                 if(time<=0){
                     //未迟到
                     signStatu=0;
@@ -260,6 +328,7 @@ public class AbilityServiceImpl implements AbilityService {
                 }else{
                     signStatu=4;
                 }
+                one.setLateTime(time);
                 one.setStartTime(signTime);
                 one.setRemark("签到备注："+message);
                 one.setIsLate(signStatu);
@@ -294,8 +363,10 @@ public class AbilityServiceImpl implements AbilityService {
                 if(perMess==null){
                     perMess = "签退备注："+message;
                 }else{
-                    if(perMess.indexOf("\n")>0){
-                        perMess=perMess.substring(0,perMess.indexOf("\n"))+"\n签退备注："+message;
+                    if(perMess.indexOf("签退备注")>0){
+                        perMess=perMess.substring(0,perMess.indexOf("签退备注")).replace("\n", "")+"\n签退备注："+message;
+                    }else{
+                        perMess=perMess+"\n签退备注："+message;
                     }
                 }
                 //perMess = perMess==null?"签退备注："+message:perMess+"\n签退备注："+message;
@@ -317,12 +388,65 @@ public class AbilityServiceImpl implements AbilityService {
         one.setTemperature(temperature);
         one.setName(name);
 
-        aeRecord.setState(1);
-        aeRecordService.updateById(aeRecord);
+       // aeRecord.setState(1);
+       // aeRecordService.updateById(aeRecord);
         aeDailySignService.updateById(one);
         Result<Object> result = signType? Result.ok("签到成功"): Result.ok("签退成功");
         result.setResult(map);
         return result;
+    }
+
+    private long signDate(Date today,String id) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+        calendar.add(Calendar.DATE, -1);
+        Date perDate = calendar.getTime();
+        SimpleDateFormat format= new SimpleDateFormat("yyyy-MM-dd");
+        String perDateStr = format.format(perDate);
+        //查询上一天几点离开公司
+        QueryWrapper<AeDailySign> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("loginid",id );
+        queryWrapper.apply("UNIX_TIMESTAMP(sign_date) >= UNIX_TIMESTAMP('" + perDateStr+" 00:00:00" + "')");
+        queryWrapper.apply("UNIX_TIMESTAMP(sign_date) <= UNIX_TIMESTAMP('" + perDateStr+" 23:59:59" + "')");
+        AeDailySign one = aeDailySignService.getOne(queryWrapper);
+        if(one==null){
+            //异常情况
+            log.error("异常情况");
+            return ERROR_SING_KEY;
+        }
+        //昨天签退时间
+        Date endTime = one.getEndTime();
+        if(one.getIsAbsent()==1){
+            log.error("昨天未打卡");
+            //昨天未打卡
+            return NO_SING_KEY;
+        }
+
+        try{
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            long normalTime = df.parse(perDateStr+" 21:30:00").getTime();
+            long diff=(endTime.getTime()-normalTime)/1000/60;
+            if(diff<0){
+                return COMMON_SING_KEY;
+            }else if(diff>=0 && diff<30){
+                log.error("9点半之后 10点之前 打卡");
+                //9点半之后 10点之前
+                return 30;
+            }if(diff>=30 && diff<90){
+                log.error("10点之后 11点之前 打卡");
+
+                //10点之后 11点之前
+                return 60;
+            }if(diff>=90 && diff<150){
+                log.error("11点之后 12点之前 打卡");
+                //11点之后 12点之前
+                return 120;
+            }
+        }catch (Exception e){
+            return ERROR_SING_KEY;
+        }
+        return ERROR_SING_KEY;
     }
 
     /**
@@ -366,7 +490,7 @@ public class AbilityServiceImpl implements AbilityService {
                 }
                 one.setEndTime(signTime);
                 one.setRemark("签退备注：高温签退，"+temperature);
-                one.setIsOvertime(signStatu);
+                //one.setIsOvertime(signStatu);
                 aeDailySignService.updateById(one);
             } catch (ParseException e) {
                 e.printStackTrace();

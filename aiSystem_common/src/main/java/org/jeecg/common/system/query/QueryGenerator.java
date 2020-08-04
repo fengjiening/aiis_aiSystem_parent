@@ -436,7 +436,8 @@ public class QueryGenerator {
 			queryWrapper.le(name, value);
 			break;
 		case EQ:
-			queryWrapper.like(name, value);
+			if(name.equals("is_overtime")) queryWrapper.eq(name, value);
+			else queryWrapper.like(name, value);
 			break;
 		case NE:
 			queryWrapper.ne(name, value);

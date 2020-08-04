@@ -132,5 +132,5 @@ public class AeDailySign implements Serializable {
 	/**迟到分钟*/
 	@Excel(name = "迟到分钟", width = 15)
     @ApiModelProperty(value = "迟到分钟")
-    private Integer lateTime;
+    private Long lateTime;
 }
