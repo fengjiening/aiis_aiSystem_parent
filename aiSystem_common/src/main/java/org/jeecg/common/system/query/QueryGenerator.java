@@ -305,7 +305,7 @@ public class QueryGenerator {
 		if(rule == null && val.startsWith(NOT_EQUAL)){
 			rule = QueryRuleEnum.NE;
 		}
-		return rule != null ? rule : QueryRuleEnum.EQ;
+		return rule != null ? rule : QueryRuleEnum.LIKE;
 	}
 	
 	/**
@@ -436,8 +436,9 @@ public class QueryGenerator {
 			queryWrapper.le(name, value);
 			break;
 		case EQ:
-			if(name.equals("is_overtime")) queryWrapper.eq(name, value);
-			else queryWrapper.like(name, value);
+//			if(name.equals("is_overtime")) queryWrapper.eq(name, value);
+//			else queryWrapper.like(name, value);
+			queryWrapper.eq(name, value);
 			break;
 		case NE:
 			queryWrapper.ne(name, value);
