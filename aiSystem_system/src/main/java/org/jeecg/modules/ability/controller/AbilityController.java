@@ -36,7 +36,6 @@ public class AbilityController{
     @RequestMapping(value = "/vpr/{invalidata}")
     public Result<?> vprRecognize(@PathVariable("invalidata") String invalidata,String voiceData,String dataFormat ) {
         log.info("声纹识别 HTTP接口进入");
-        log.debug("声纹识别 HTTP接口进入");
 /*
 //测试代码
         String savePath = "c:/pcm/34796210.pcm";
@@ -56,7 +55,9 @@ public class AbilityController{
         try{
             String [] inStr = invalidata.split("-");
             if (MD5Util.MD5Encode(inStr[2]+MD5Util.SECRET,null).equals(inStr[1])){
-                return abilityService.callVprRecognizeAbility(voiceData);
+                Result<?> result = abilityService.callVprRecognizeAbility(voiceData);
+                log.info("声纹识别 HTTP接口结束");
+                return result;
             }else  return  Result.error("非法请求！！");
 
         }catch (JeecgBootException e){
@@ -64,6 +65,7 @@ public class AbilityController{
         }catch (Exception e){
              return   Result.error("非法请求！！");
         }
+
     }
 
 

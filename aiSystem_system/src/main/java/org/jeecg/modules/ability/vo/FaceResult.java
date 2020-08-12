@@ -19,12 +19,22 @@ public class FaceResult implements Serializable {
     private FaceBox faceBox;
     private Integer match;
     private boolean stable;
+    private boolean center;
     private UserFaceInfo result;
     private String timestamp;
+
 
     public FaceResult(FaceBox faceBox, UserFaceInfo result) {
         this.faceBox = faceBox;
         this.result = result;
+    }
+
+    public boolean isCenter() {
+        return center;
+    }
+
+    public void setCenter(boolean center) {
+        this.center = center;
     }
 
     public FaceBox getFaceBox() {

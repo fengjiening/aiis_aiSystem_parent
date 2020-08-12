@@ -375,9 +375,9 @@ public class AbilityCallMethod {
      * @Description: TODO(这里用一句话描述这个方法的作用)
      */
 
-   static FaceBox faceBox = new FaceBox();
-   static UserFaceInfo userInfo = new UserFaceInfo();
-   static FaceResult faceResultVo=new FaceResult(faceBox,userInfo);
+   static volatile FaceBox faceBox = new FaceBox();
+   static volatile UserFaceInfo userInfo = new UserFaceInfo();
+   static volatile FaceResult faceResultVo=new FaceResult(faceBox,userInfo);
 
     @SuppressWarnings("unchecked")
     public static FaceResult callAfrDetectAbility(

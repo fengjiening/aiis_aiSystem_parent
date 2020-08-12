@@ -9,13 +9,14 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.modules.ability.service.FaceTask;
 import org.jeecg.modules.ability.vo.PicDataInput;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,7 +56,7 @@ public class WebSocket {
     public void onerror(Session session, Throwable throwable){
         try {
             webSockets.remove(this);
-            log.info("【websocket消息】err 连接断开，总数为:"+webSockets.size());
+            log.error("【websocket消息】err 连接断开，总数为:"+webSockets.size());
         } catch (Exception e) {
         }
     }
@@ -82,18 +83,18 @@ public class WebSocket {
     public void onClose() {
         try {
 			webSockets.remove(this);
-			log.info("【websocket消息】连接断开，总数为:"+webSockets.size());
+			log.error("【websocket消息】连接断开，总数为:"+webSockets.size());
 		} catch (Exception e) {
 		}
     }
     
     @OnMessage
     public void onMessage(String message) {
-
-    	log.debug("【websocket消息】收到客户端消息:"+message);
     	if(StringUtils.isEmpty(message)|| JSONObject.isValidObject(message)){
             //todo 视屏针有可能丢弃 后面处理
-            if (!queue.offer( JSONObject.parseObject(message,PicDataInput.class)))log.error("视屏缓冲区已满");
+            PicDataInput picDataInput =  JSON.parseObject(message, PicDataInput.class);
+        //if (!queue.offer( JSONObject.parseObject(message,PicDataInput.class)))log.error("视屏缓冲区已满");
+            if (!queue.offer(picDataInput))log.error("视屏缓冲区已满");
         }else{
             //todo 异常信息返回
             session.getAsyncRemote().sendText("错误");

@@ -118,11 +118,11 @@ public class AbilityServiceImpl implements AbilityService {
                 user = getUserInfo("afr",userID);
                 if(user!=null) break;
             }
-            //match 3 平台识别到 ，但是考勤没有这个人
-            //match 2  识别到了这个人
-            //match 1   平台未找到这个人
-            //match 0   人脸探测失败
-            //match 4 用户被禁用
+            //match 3 平台识别到 ，但是考勤没有这个人  code 3
+            //match 2  识别到了这个人                      2
+            //match 1   平台未找到这个人                    1
+            //match 0   人脸探测失败                        0
+            //match 4 用户被禁用                              4
             if(user==null){
                 faceResult.setResult(null);
                 faceResult.setMatch(3);
@@ -176,14 +176,14 @@ public class AbilityServiceImpl implements AbilityService {
 //        //测试下载音频
 //        InputStream vStream1 = CommonMethod.decoderBase64ToStream(vStreamstr);
 //        CommonMethod.writeToLocal("c://test.pcm",vStream1);
-
+        log.info("声纹识别 HTTP接口 进入平台开始");
         CommonReturnMethod<List<Recognise_Result>> listCommonReturnMethod = AbilityCallMethod.callVPRRecognizeAbility(SystemConstant.getVprUrl() + SystemConstant.VPR_RECOGNISE_URL, SystemConstant.getVprAppKey(), SystemConstant.getVprCapKey(), SystemConstant.getVprSdkVersion(), SystemConstant.getVprDeveloperKey(), vStream, SystemConstant.getVprThreshold(), SystemConstant.getVprAudioformat(), SystemConstant.getVprProperty());
+        log.info("声纹识别 HTTP接口 进入平台结束");
         UserVprInfo info =new UserVprInfo();
         if (listCommonReturnMethod.getErrorCode()==0&&listCommonReturnMethod.getResult().size()>0){
             String token =listCommonReturnMethod.getResult().get(0).getToken();
             info.setToken(token);
             info.setScore(String.valueOf(listCommonReturnMethod.getResult().get(0).getSocre()));
-
 
             //todo  数据查询用户信息
             RegisteredInfo user=null;
@@ -193,40 +193,49 @@ public class AbilityServiceImpl implements AbilityService {
                 user = getUserInfo("vpr",userID);
                 if(user!=null) break;
             }
+            //code 3 平台识别到 ，但是考勤没有这个人
+            //code 2  识别到了这个人
+            //code 1   平台未找到这个人
+            //code 0   人脸探测失败
+            //code 4 用户被禁用
             if(user==null){
-                return Result.error("识别失败");
+                return Result.error(3,"平台识别到 ，但是考勤没有这个人");
             }else if(user!=null&& user.getIsDel()==1){
                 //用户被禁用
-                return  Result.error("用户状态异常");
+                return Result.error(4,"用户被禁用");
+            }else{
+
+                info.setBirth(user.getBirthday());
+                info.setGender("1".equals(user.getSex())?"男":"女");
+                info.setName(user.getName());
+                info.setSysTime(String.valueOf(DateUtils.getMillis()));
+                info.setId(user.getLoginid());
+                info.setHeadPic(BASE_PIC_URL+user.getUserFace());
+
+
+                //中间记录
+                AeRecord ac =new AeRecord();
+                ac.setIp("0.0.0.0");
+                ac.setEtype(3);
+                ac.setToken(token);
+                ac.setLoginid(user.getLoginid());
+                ac.setRemark("智慧打卡");
+                ac.setState(0);
+                ac.setCreateTime(new Date());
+                aeRecordService.save(ac);
+
+                //保存数据
+                log.info("声纹识别 HTTP接口 保存数据开始");
+                InputStream newvStream = CommonMethod.decoderBase64ToStream(vStreamstr);
+                String newPath = genToPathById(user.getLoginid(),"vpr",newvStream);
+                info.setVoiceDataPath(newPath);
+                log.info("声纹识别 HTTP接口 保存数据结束");
+                return  Result.ok(2,info);
             }
 
-            info.setBirth(user.getBirthday());
-            info.setGender("1".equals(user.getSex())?"男":"女");
-            info.setName(user.getName());
-            info.setSysTime(String.valueOf(DateUtils.getMillis()));
-            info.setId(user.getLoginid());
-            info.setHeadPic(BASE_PIC_URL+user.getUserFace());
-
-
-            //中间记录
-            AeRecord ac =new AeRecord();
-            ac.setIp("0.0.0.0");
-            ac.setEtype(3);
-            ac.setToken(token);
-            ac.setLoginid(user.getLoginid());
-            ac.setRemark("智慧打卡");
-            ac.setState(0);
-            ac.setCreateTime(new Date());
-            aeRecordService.save(ac);
-
-
-            //保存数据
-            InputStream newvStream = CommonMethod.decoderBase64ToStream(vStreamstr);
-            String newPath = genToPathById(user.getLoginid(),"vpr",newvStream);
-            info.setVoiceDataPath(newPath);
-
-            return  Result.ok(info);
-        }else return Result.error("识别失败");
+        }else{
+            return Result.error(1,"识别失败");
+        }
 
     }
 
@@ -528,12 +537,6 @@ public class AbilityServiceImpl implements AbilityService {
         String path =SystemConstant.getDataPathPre()+"/";
         String newDay =  DateUtils.formatDate();
         System.out.println(newDay);
-//        File dir = new File(path+newDay);
-//        if (!dir.isDirectory()) {
-//            System.out.println("用户ID索引文件不存在 to 创建");
-//            dir.mkdirs();
-//            System.out.println("创建文件夹");
-//        }
         String newPath= path+newDay+"/"+id+"/";
         File dir1 = new File(newPath);
         if (!dir1.isDirectory()) {

@@ -85,6 +85,14 @@ public class Result<T> implements Serializable {
 		r.setResult(data);
 		return r;
 	}
+	public static Result<Object> ok(int code,Object data) {
+		Result<Object> r = new Result<Object>();
+		r.setCode(code);
+		r.setSuccess(true);
+		r.setCode(CommonConstant.SC_OK_200);
+		r.setResult(data);
+		return r;
+	}
 	
 	public static Result<Object> error(String msg) {
 		return error(CommonConstant.SC_INTERNAL_SERVER_ERROR_500, msg);

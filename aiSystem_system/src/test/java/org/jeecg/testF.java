@@ -1,6 +1,8 @@
 package org.jeecg;
 
 
+import org.jeecg.common.util.MD5Util;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,9 +17,7 @@ public class testF {
     public static void main (String [] a ) throws Exception{
 
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //String format = df.format("2020-07-29" + " 21:30:00");
-        long normalTime = df.parse("2020-07-30" + " 10:35:00").getTime();
-        System.err.println(normalTime);
+        String s = MD5Util.MD5Encode("ddd" + MD5Util.SECRET, null);
+        System.err.println(s);
     }
 }

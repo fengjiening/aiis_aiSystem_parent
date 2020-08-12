@@ -48,9 +48,10 @@ public class  FaceTask {
     @Async
     public void delFace(Session session, BlockingQueue queue, List<Float> frameXList, List<Float> frameYList){
         log.info(Thread.currentThread().getName()+"delFace 线程开始启动");
+        PicDataInput input=null;
         while (session.isOpen()){
             try {
-                log.debug(Thread.currentThread().getName()+" 开始获取图片数据总数【{}】",queue.size());
+                //log.error(Thread.currentThread().getName()+" 开始获取图片数据总数【{}】",queue.size());
 
                 if (queue.size()==0){
                     Thread.sleep(1000);
@@ -58,8 +59,8 @@ public class  FaceTask {
                 }
                 //take 线程阻塞，后面客户端断开 会导致资源消耗
                 // PicDataInput input = (PicDataInput)queue.take();
-                PicDataInput input = (PicDataInput)queue.poll();
-//测试 当前上传人脸图片
+                input = (PicDataInput)queue.poll();
+                //测试 当前上传人脸图片
 //                InputStream faceStreamc =  CommonMethod.decoderBase64ToStream(input.getPicData());
 //                String savePath = "c://face.png";
 //                File file = new File(savePath);
@@ -69,18 +70,17 @@ public class  FaceTask {
 
                 //人脸探测
                  FaceResult faceResult = afrDetect(CommonMethod.decoderBase64ToStream(input.getPicData()));
-                 //FaceResult faceResult = afrDetect(faceStreamc);
 
-                //实时返回人脸坐标
-                sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
-
-                log.debug(Thread.currentThread().getName()+" 返回结果【{}】", JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
+                //log.error(Thread.currentThread().getName()+" 返回结果【{}】", JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
                 //参数校验
                 //未获取坐标数据 不去计算
-                if (faceResult.getFaceBox()==null) continue;
-                if (faceResult.getFaceBox().getX1()==null ||faceResult.getFaceBox().getX2()==null||
-                faceResult.getFaceBox().getY1()==null||faceResult.getFaceBox().getY2()==null)continue;
-                if (input.getTotalFrame()<=0) continue;
+                if (faceResult.getFaceBox()==null ||faceResult.getFaceBox().getX1()==null ||faceResult.getFaceBox().getX2()==null||
+                faceResult.getFaceBox().getY1()==null||faceResult.getFaceBox().getY2()==null || input.getTotalFrame()<=0){
+                    faceResult.setStable(false);
+                    faceResult.setCenter(false);
+                    sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
+                    continue;
+                };
 
                 //人脸坐标
                 float x1=Float.valueOf(faceResult.getFaceBox().getX1());
@@ -91,6 +91,25 @@ public class  FaceTask {
                 //获取中心点
                 float x= Math.abs(x2-x1)/2+x1 ;
                 float y= Math.abs(y1-y2)/2+y2;
+
+                //判断是否未中心，再去返回人脸坐标
+                int i1 = input.getPicWidth() / 2;
+                int i2 = input.getMinHeadSize() / 2;
+
+                //判断 人脸中心 是否位于中性点
+                if((i1-i2)<x && (i1+i2)>x){
+                    //实时返回人脸坐标
+                    faceResult.setCenter(true);
+                    sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
+                    log.debug(Thread.currentThread().getName()+"【居中】【 min：{} x:{} max：{}】",(i1-i2),x,(i1+i2) );
+                }else{
+                   log.debug(Thread.currentThread().getName()+" 【不居中】【 min：{} x:{} max：{}】",(i1-i2),x,(i1+i2) );
+                    faceResult.setStable(false);
+                    faceResult.setCenter(false);
+                    sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
+                    continue;
+                }
+
                 //计算人脸大小符合最小宽度MinHeadSize
                 if ( Math.abs(x2-x1)>=input.getMinHeadSize()&&Math.abs(y1-y2)>=input.getMinHeadSize()){
                     //是否满足总帧数
@@ -116,13 +135,10 @@ public class  FaceTask {
                                 log.info(Thread.currentThread().getName()+"检查成功，开始进行人脸对比..............");
                                 sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
                                 clearResult(faceResult,queue);
-
-
                             }
                             frameXList.clear();
                             frameYList.clear();
                             Thread.sleep(500);
-                            queue.clear();
 
 
                         }else{
@@ -143,6 +159,13 @@ public class  FaceTask {
             }catch (Exception e){
                 log.error("Exception 获取队列信息出错");
                 e.printStackTrace();
+            }finally {
+                //释放 输入数据
+                if(input!=null){
+                    input.setPicData(null);
+                    input=null;
+                }
+
             }
 
 
@@ -168,6 +191,8 @@ public class  FaceTask {
 
     private void clearResult(FaceResult face,BlockingQueue queue) {
         UserFaceInfo result=face.getResult();
+        //清除队列信息
+        if(queue!=null) queue.clear();
         face.setStable(false);
         face.setMatch(0);
        if(result!=null){
@@ -182,8 +207,7 @@ public class  FaceTask {
            result.setId("");
            result.setToken("");
        }
-        //清除队列信息
-        if(queue!=null) queue.clear();
+
 
 
     }

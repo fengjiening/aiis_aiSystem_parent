@@ -8,8 +8,8 @@ public class PicDataInput {
 
     /**
      * timeStamp : 1955412151
-     * picWidth : 800
-     * picHeight : 600
+     * picWidth : 1440
+     * picHeight : 1080
      * pixelDepth : 3
      * picData : 6Zi/5aSn5aOw6YGT5ZWK5LiJ5omT5LiJ6Ziy5ZWK5rKZ5Y+R5ZWK5rKZ5Y+R6aOe5rSS6JCo6Iqs5ZWK5rKZ5Y+R6Zi/5pa557SiYQ==
      * minHeadSize : 500
