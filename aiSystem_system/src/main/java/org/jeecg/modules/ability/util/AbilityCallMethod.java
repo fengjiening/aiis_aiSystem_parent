@@ -375,14 +375,11 @@ public class AbilityCallMethod {
      * @Description: TODO(这里用一句话描述这个方法的作用)
      */
 
-   static volatile FaceBox faceBox = new FaceBox();
-   static volatile UserFaceInfo userInfo = new UserFaceInfo();
-   static volatile FaceResult faceResultVo=new FaceResult(faceBox,userInfo);
 
     @SuppressWarnings("unchecked")
     public static FaceResult callAfrDetectAbility(
             String url, String appKey, String capKey, String sdkVersion,
-            String develoerKey, String params, InputStream inputFile) {
+            String develoerKey, String params, InputStream inputFile, FaceBox faceBox, UserFaceInfo userInfo , FaceResult faceResultVo) {
         CommonReturnMethod<String> retResut = detectAbility(url, appKey,
                 sdkVersion, capKey, params, develoerKey, inputFile);
         //初始一定值

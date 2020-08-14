@@ -12,6 +12,7 @@ import org.jeecg.common.util.CommonReturnMethod;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.modules.ability.util.AbilityCallMethod;
 import org.jeecg.modules.ability.util.Recognise_Result;
+import org.jeecg.modules.ability.vo.FaceBox;
 import org.jeecg.modules.ability.vo.FaceResult;
 import org.jeecg.modules.ability.vo.PicDataInput;
 
@@ -40,7 +41,13 @@ public class  FaceTask {
 
     @Autowired
     private AbilityService abilityService;
-
+    static ThreadLocal<FaceBox> faceBoxThread=new ThreadLocal<FaceBox>();
+    static ThreadLocal<UserFaceInfo> UserFaceInfoThread=new ThreadLocal<UserFaceInfo>();
+    static ThreadLocal<FaceResult> FaceResultThread=new ThreadLocal<FaceResult>();
+    private static final int  recgWidth = 780 / 2;
+//    static  FaceBox faceBox = new FaceBox();
+//    static  UserFaceInfo userInfo = new UserFaceInfo();
+//    static  FaceResult faceResultVo=new FaceResult(faceBox,userInfo);
     /**
      * todo 需要改进，针对 会话session管理
      * @param queue
@@ -48,6 +55,11 @@ public class  FaceTask {
     @Async
     public void delFace(Session session, BlockingQueue queue, List<Float> frameXList, List<Float> frameYList){
         log.info(Thread.currentThread().getName()+"delFace 线程开始启动");
+         FaceBox faceBox = new FaceBox();
+        UserFaceInfo userInfo = new UserFaceInfo();
+        faceBoxThread.set(faceBox);
+        UserFaceInfoThread.set(userInfo);
+        FaceResultThread.set(new FaceResult(faceBox,userInfo));
         PicDataInput input=null;
         while (session.isOpen()){
             try {
@@ -94,16 +106,16 @@ public class  FaceTask {
 
                 //判断是否未中心，再去返回人脸坐标
                 int i1 = input.getPicWidth() / 2;
-                int i2 = input.getMinHeadSize() / 2;
+
 
                 //判断 人脸中心 是否位于中性点
-                if((i1-i2)<x && (i1+i2)>x){
+                if((i1-recgWidth)<x && (i1+recgWidth)>x){
                     //实时返回人脸坐标
                     faceResult.setCenter(true);
                     sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
-                    log.debug(Thread.currentThread().getName()+"【居中】【 min：{} x:{} max：{}】",(i1-i2),x,(i1+i2) );
+                    log.debug(Thread.currentThread().getName()+"【居中】【 min：{} x:{} max：{}】",(i1-recgWidth),x,(i1+recgWidth) );
                 }else{
-                   log.debug(Thread.currentThread().getName()+" 【不居中】【 min：{} x:{} max：{}】",(i1-i2),x,(i1+i2) );
+                   log.debug(Thread.currentThread().getName()+" 【不居中】【 min：{} x:{} max：{}】",(i1-recgWidth),x,(i1+recgWidth) );
                     faceResult.setStable(false);
                     faceResult.setCenter(false);
                     sendOneMessage(session, JSONObject.toJSONString(faceResult,SerializerFeature.WriteNullStringAsEmpty));
@@ -185,6 +197,9 @@ public class  FaceTask {
             frameXList.clear();
             frameXList=null;
         }
+        faceBoxThread.remove();
+        UserFaceInfoThread.remove();
+        FaceResultThread.remove();
         log.info(Thread.currentThread().getName()+"delFace 线程完成");
 
     }
@@ -230,9 +245,12 @@ public class  FaceTask {
     }
 
     private FaceResult afrDetect( InputStream inputFile) {
-
         try{
-            FaceResult faceResult = AbilityCallMethod.callAfrDetectAbility(SystemConstant.getAfrUrl() + SystemConstant.DETECT_URL, SystemConstant.getAfrAppKey(), SystemConstant.getAfrCapKey(), SystemConstant.getAfrSdkVersion(), SystemConstant.getAfrDeveloperKey(),",minfacewidth=20,minfaceheight=20,autoscale=no,gender=yes,detectThreshold=0.9", inputFile);
+            FaceResult faceResult = AbilityCallMethod.callAfrDetectAbility(SystemConstant.getAfrUrl() + SystemConstant.DETECT_URL,
+                    SystemConstant.getAfrAppKey(), SystemConstant.getAfrCapKey(),
+                    SystemConstant.getAfrSdkVersion(), SystemConstant.getAfrDeveloperKey(),
+                    ",minfacewidth=20,minfaceheight=20,autoscale=no,gender=yes,detectThreshold=0.9", inputFile
+            , faceBoxThread.get(),UserFaceInfoThread.get(),FaceResultThread.get());
             return faceResult;
         }catch (Exception e){
             e.printStackTrace();

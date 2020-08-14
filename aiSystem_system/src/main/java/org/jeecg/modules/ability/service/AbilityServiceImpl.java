@@ -89,13 +89,13 @@ public class AbilityServiceImpl implements AbilityService {
      */
     @Override
     public FaceResult afrDetect( InputStream inputFile) {
-
-        try{
-            FaceResult faceResult = AbilityCallMethod.callAfrDetectAbility(SystemConstant.getAfrUrl() + SystemConstant.DETECT_URL, SystemConstant.getAfrAppKey(), SystemConstant.getAfrCapKey(), SystemConstant.getAfrSdkVersion(), SystemConstant.getAfrDeveloperKey(), "no", inputFile);
-            return faceResult;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//
+//        try{
+//            FaceResult faceResult = AbilityCallMethod.callAfrDetectAbility(SystemConstant.getAfrUrl() + SystemConstant.DETECT_URL, SystemConstant.getAfrAppKey(), SystemConstant.getAfrCapKey(), SystemConstant.getAfrSdkVersion(), SystemConstant.getAfrDeveloperKey(), "no", inputFile);
+//            return faceResult;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
         return null;
     }
     /**
