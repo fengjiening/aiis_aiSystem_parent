@@ -1,5 +1,6 @@
 package org.jeecg.config.thread;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -14,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @EnableAsync
+@Slf4j
 public class TaskPoolConfig {
 
 
@@ -26,7 +28,7 @@ public class TaskPoolConfig {
 
         //此方法返回可用处理器的虚拟机的最大数量; 不小于1
         int core = Runtime.getRuntime().availableProcessors()+1;
-        System.err.println("处理器的虚拟机的最大数量->"+core);
+        log.info("处理器的虚拟机的最大数量->{}",core);
         executor.setCorePoolSize(core);
         // 设置最大线程数
         executor.setMaxPoolSize(core+5);

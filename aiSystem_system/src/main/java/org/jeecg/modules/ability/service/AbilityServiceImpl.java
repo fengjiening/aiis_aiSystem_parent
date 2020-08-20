@@ -173,9 +173,13 @@ public class AbilityServiceImpl implements AbilityService {
     public Result<?> callVprRecognizeAbility( String vStreamstr) throws Exception {
         InputStream vStream = CommonMethod.decoderBase64ToStream(vStreamstr);
 
-//        //测试下载音频
+//       //测试下载音频 -开始
+//        String path =SystemConstant.getDataPathPre()+"/";
+//        String newDay = path+ DateUtils.getTimestamp().getTime()+"_vpr_test.pcm";
 //        InputStream vStream1 = CommonMethod.decoderBase64ToStream(vStreamstr);
-//        CommonMethod.writeToLocal("c://test.pcm",vStream1);
+//        CommonMethod.writeToLocal(newDay,vStream1);
+//        //测试下载音频 - 结束
+
         log.info("声纹识别 HTTP接口 进入平台开始");
         CommonReturnMethod<List<Recognise_Result>> listCommonReturnMethod = AbilityCallMethod.callVPRRecognizeAbility(SystemConstant.getVprUrl() + SystemConstant.VPR_RECOGNISE_URL, SystemConstant.getVprAppKey(), SystemConstant.getVprCapKey(), SystemConstant.getVprSdkVersion(), SystemConstant.getVprDeveloperKey(), vStream, SystemConstant.getVprThreshold(), SystemConstant.getVprAudioformat(), SystemConstant.getVprProperty());
         log.info("声纹识别 HTTP接口 进入平台结束");

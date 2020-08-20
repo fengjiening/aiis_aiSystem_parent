@@ -44,7 +44,7 @@ public class  FaceTask {
     static ThreadLocal<FaceBox> faceBoxThread=new ThreadLocal<FaceBox>();
     static ThreadLocal<UserFaceInfo> UserFaceInfoThread=new ThreadLocal<UserFaceInfo>();
     static ThreadLocal<FaceResult> FaceResultThread=new ThreadLocal<FaceResult>();
-    private static final int  recgWidth = 780 / 2;
+    private static final int   recgWidth = 780 / 2;
 //    static  FaceBox faceBox = new FaceBox();
 //    static  UserFaceInfo userInfo = new UserFaceInfo();
 //    static  FaceResult faceResultVo=new FaceResult(faceBox,userInfo);

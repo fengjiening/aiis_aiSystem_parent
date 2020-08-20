@@ -23,10 +23,12 @@ import java.util.stream.Stream;
 
 public class PTest {
     public static void main(String[] a1) {
-//        Integer a =128;
-//        Integer b =128;
-
-//        System.out.println(Integer.max(1,2));
+        Integer a2 =122;
+        Integer b1 =new Integer(122);
+        int a3=128;
+        int a4=128;
+        System.out.println(a2==b1);
+        System.out.println(a3==a4);
 //
 //        Algorithm algorithm = Algorithm.HMAC256("1234561aa");
 //        JWTVerifier verifier = JWT.require(algorithm).withClaim("username", "admin").build();
@@ -46,26 +48,44 @@ public class PTest {
 
         Stream<String> stream = Stream.of("d2", "a2", "b1", "b3", "c").filter(s -> s.startsWith("a"));
 
-        stream.anyMatch(s -> true); // ok stream.noneMatch(s -> true); // exception
-
-        Stream.of("d2", "a2", "b1", "b3", "c").filter(s -> s.startsWith("a")).forEach(System.err::println);
-
+        boolean b22 = stream.anyMatch(s -> true);// ok stream.noneMatch(s -> true); // exception
+        System.err.println("==============b22==============");
+        System.err.println(b22);
+        Stream.of("d2", "a2", "b1", "b3", "c").filter(s -> s.startsWith("b")).forEach(System.err::println);
+        System.err.println("=========str===================");
         String a = "abc";
         String b = "abc";
         String c = new String("abc");
         String d = new String("abc");
+        String k = "de";
+        String y= "abcde";
         System.err.println(a == b);
         System.err.println(a == c);
         System.err.println(c == d);
+        System.err.println(a+k== y);
         System.err.println(DateUtils.getMillis());
 
-
+        System.err.println("============================");
         Integer e =123;
         Integer f =123;
         Integer g =new Integer(123);
         System.err.println("============================");
         System.err.println(e == f);
         System.err.println(e == g);
+
+        System.err.println("============int================");
+        Integer e1 =100;
+        Integer f1 =100;
+        Integer g1 =200;
+
+        System.err.println(e1 == f1);
+        System.err.println(e1+f1 == g1);
+        Integer e2 =50;
+        Integer f2 =50;
+        Integer g2 =100;
+
+        System.err.println(e2 == f2);
+        System.err.println(e2+f2 == g2);
 
 
 

@@ -159,7 +159,9 @@ public class QueryGenerator {
 				}else {
 					//根据参数值带什么关键字符串判断走什么类型的查询
 					QueryRuleEnum rule = convert2Rule(value);
-					value = replaceValue(rule,value);
+					if(!rule.getValue().equals("LIKE")){
+						value = replaceValue(rule,value);
+					}
 					// add -begin 添加判断为字符串时设为全模糊查询
 					//if( (rule==null || QueryRuleEnum.EQ.equals(rule)) && "class java.lang.String".equals(type)) {
 						// 可以设置左右模糊或全模糊，因人而异

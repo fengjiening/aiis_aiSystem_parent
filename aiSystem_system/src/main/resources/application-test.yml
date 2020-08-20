@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8082
   tomcat:
     max-swallow-size: -1
   servlet:
@@ -8,27 +8,27 @@ server:
     enabled: true
     min-response-size: 1024
     mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
-        
+
 management:
  endpoints:
   web:
    exposure:
     include: metrics,httptrace
-    
+
 spring:
   servlet:
-     multipart: 
+     multipart:
         max-file-size: 10MB
         max-request-size: 10MB
   mail:
-    host: smtp.163.com
-    username: jeecgos@163.com
-    password: ??
+    host: smtp.qq.com
+    username: 271760513@qq.com
+    password: wh520+199551
     properties:
-      mail: 
-        smtp: 
+      mail:
+        smtp:
           auth: true
-          starttls: 
+          starttls:
             enable: true
             required: true
   ## quartz定时任务,采用数据库方式
@@ -61,16 +61,16 @@ spring:
   jackson:
     date-format:   yyyy-MM-dd HH:mm:ss
     time-zone:   GMT+8
-  jpa:
-    open-in-view: false
+  aop:
+    proxy-target-class: true
   activiti:
     check-process-definitions: false
     #启用作业执行器
     async-executor-activate: false
     #启用异步执行器
     job-executor-activate: false
-  aop:
-    proxy-target-class: true
+  jpa:
+    open-in-view: false
   #配置freemarker
   freemarker:
     # 设置模板后缀名
@@ -88,7 +88,7 @@ spring:
   # 设置静态文件路径，js,css等
   mvc:
     static-path-pattern: /**
-  resource: 
+  resource:
     static-locations: classpath:/static/,classpath:/public/
   autoconfigure:
     exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
@@ -96,12 +96,12 @@ spring:
     druid:
       stat-view-servlet:
         enabled: true
-        loginUsername: admin
+        loginUsername: root
         loginPassword: 123456
         allow:
       web-stat-filter:
         enabled: true
-    dynamic: 
+    dynamic:
       druid: # 全局druid参数，绝大部分值和默认保持一致。(现已支持的参数如下,不清楚含义不要乱设置)
         # 连接池的配置信息
         # 初始化大小，最小，最大
@@ -125,35 +125,35 @@ spring:
         filters: stat,wall,slf4j
         # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
         connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
-      datasource: 
-          master: 
-            url: jdbc:mysql://127.0.0.1:3306/jeecg-boot?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
-            username: root
-            password: root
+      datasource:
+        master:
+            url: jdbc:mysql://10.0.1.47:3306/test_attendance?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+            username: kqtest
+            password: kaoqintest
             driver-class-name: com.mysql.jdbc.Driver
-          # 多数据源配置   
-          #multi-datasource1: 
-            #url: jdbc:mysql://localhost:3306/jeecg-boot2?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true
-            #username: root
-            #password: root
-            #driver-class-name: com.mysql.jdbc.Driver
+        # 多数据源配置
+        #multi-datasource1:
+#            url: jdbc:mysql://10.0.1.47:3306/test_attendance?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+#            username: kqtest
+#            password: kaoqintest
+#            driver-class-name: com.mysql.jdbc.Driver
   #redis 配置
   redis:
-     database: 0
-     host: 192.168.1.199
-     lettuce:
-       pool:
-         max-active: 8   #最大连接数据库连接数,设 0 为没有限制
-         max-idle: 8     #最大等待连接中的数量,设 0 为没有限制
-         max-wait: -1ms  #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
-         min-idle: 0     #最小等待连接中的数量,设 0 为没有限制
-       shutdown-timeout: 100ms
-     password: ''
-     port: 6379
+    database: 0
+    host: 10.0.3.28
+    lettuce:
+      pool:
+        max-active: 8   #最大连接数据库连接数,设 0 为没有限制
+        max-idle: 8     #最大等待连接中的数量,设 0 为没有限制
+        max-wait: -1ms  #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
+        min-idle: 0     #最小等待连接中的数量,设 0 为没有限制
+      shutdown-timeout: 100ms
+    password: '123456'
+    port: 6379
 #mybatis plus 设置
 mybatis-plus:
-   mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml
-   global-config:
+  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml
+  global-config:
     # 关闭MP3.0自带的banner
     banner: false
     db-config:
@@ -161,9 +161,9 @@ mybatis-plus:
       id-type: 4
       # 默认数据库表下划线命名
       table-underline: true
-   configuration:
+  configuration:
     # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     # 返回类型为Map,显示null对应的字段
     call-setters-on-nulls: true
 #jeecg专用配置
@@ -177,7 +177,7 @@ jeecg :
     webapp: D://opt//webapp
   #短信秘钥
   sms:
-     accessKeyId: LTAIpW4gUG7xYDNI
+     accessKeyId: ??
      accessKeySecret: ??
   shiro:
      excludeUrls: /test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**
@@ -188,27 +188,50 @@ jeecg :
     secretKey: ??
     bucketName: jeecgos
     staticDomain: https://static.jeecg.com
-  # ElasticSearch 设置
+  # ElasticSearch 6设置true
   elasticsearch:
-    cluster-name: jeecg-ES
-    cluster-nodes: http://fileview.jeecg.com
-    check-enabled: false
+    cluster-name: node-my
+    cluster-nodes: 10.0.3.26:9200
+    check-enabled: true
   # 表单设计器配置
   desform:
     # 主题颜色（仅支持 16进制颜色代码）
     theme-color: "#1890ff"
   # 在线预览文件服务器地址配置
-  file-view-domain: http://127.0.0.1:8012
+  file-view-domain: http://fileview.jeecg.com
   # minio文件上传
   minio:
     minio_url: http://minio.jeecg.com
     minio_name: ??
     minio_pass: ??
     bucketName: otatest
+#Mybatis输出sql日志
+logging:
+  level:
+    org.jeecg.modules.system.mapper : debug
 #cas单点登录
 cas:
   prefixUrl: http://cas.example.org:8443/cas
 #enable swagger
 swagger:
   enable: true
-  test: a
+hcicloud:
+  head_url: http://10.0.1.47:8081/
+  data:
+    path: /home/zhihuip/kaoqi/data
+  afr:
+    afr_url: http://10.0.1.106:8880
+    devkey: 40ff7ebfb952b623149688eac84cc68b
+    appKey: 4c5d548a
+    threshold: 70
+  vpr:
+    vpr_url: http://10.0.1.106:8880
+    devkey: 40ff7ebfb952b623149688eac84cc68b
+    appKey: 4c5d548a
+    threshold: 60
+    audioformat: pcm16k16bit
+    property: 16k_digit
+
+
+
+
